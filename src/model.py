@@ -22,6 +22,7 @@ class Pretrained(nn.Sequential):
         super(Pretrained, self).__init__()
         self.model_type = model_type
         self.num_output = num_output
+
         if self.model_type == 'Alex':
             if path is None:
                 # $TORCH_HOME/models

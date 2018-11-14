@@ -3,6 +3,8 @@ import torch.nn.functional as F
 import numpy as np
 import torch.nn as nn
 
+import time
+
 def evaluate(model, db, opt):
     """
     Args:
@@ -14,7 +16,8 @@ def evaluate(model, db, opt):
     with torch.no_grad():
         # set the model in the evaluation mode
         eval_loss = 0
-        loader = torch.utils.data.DataLoader(db['eval'], batch_size = opt.batch_size, shuffle=False, num_workers = 4)
+        eval_acc = 0
+        loader = torch.utils.data.DataLoader(db['eval'], batch_size = opt.eval_batch_size, shuffle=False, num_workers = 4)
         num_eval = len(db['eval'])
         for batch_idx, batch in enumerate(loader):
             data = batch['image']
@@ -22,11 +25,17 @@ def evaluate(model, db, opt):
             if opt.cuda:
                 with torch.no_grad():
                     data, target = data.cuda(), target.cuda()
-            prediction = model(data)
-            prediction = prediction.clamp(min=1e-6,max=1) # resolve some numerical issue
-            eval_loss = F.nll_loss(torch.log(prediction), target).data.item()
+            outputs = model(data)
+            _, preds = torch.max(outputs, 1)
+
+            eval_loss += F.cross_entropy(outputs, target).data.item()
+
+            eval_acc += (preds == target).sum().data.item()
         eval_loss /= num_eval
-        print('\nTest set: Average loss: {:.6f}.'.format(eval_loss))
+        eval_acc /= num_eval
+
+        print('\nTest set: Average loss: {:.6f}. Average accuracy {:.6f}'.format(
+            eval_loss, eval_acc))
 
 def train(model, optim, sche, db, opt):
     """
@@ -39,6 +48,8 @@ def train(model, optim, sche, db, opt):
     for epoch in range(1, opt.epochs + 1):
         sche.step()
         model.train()
+        criterion = nn.CrossEntropyLoss()
+
         train_loader = torch.utils.data.DataLoader(db['train'], batch_size = opt.batch_size, shuffle = True)
         for batch_idx, batch in enumerate(train_loader):
             data = batch['image']
@@ -48,14 +59,22 @@ def train(model, optim, sche, db, opt):
                     data, target = data.cuda(), target.cuda()
             # erase all computed gradient
             optim.zero_grad()
-            prediction = model(data)
-            prediction = prediction.clamp(min=1e-6,max=1) # resolve some numerical issue
-            
-            loss = F.nll_loss(torch.log(prediction), target)
+            outputs = model(data)
+            _, preds = torch.max(outputs, 1)
+            preds = preds.clamp(min=1e-6,max=1) # resolve some numerical issue
+
+            loss = F.cross_entropy(outputs, target)
             # compute gradient
             loss.backward()
+            #print("Model's state_dict:")
+            #if loss.data.item() != 0:
+            #   print(model.alex.features[0].weight.data)
+            #for param_tensor in model.state_dict():
+            #    print(param_tensor, "\t", model.state_dict()[param_tensor].size())
             # update parameters in the neural decision forest
+            #print(prediction.data)
             optim.step()
+
             if batch_idx % opt.report_every == 0:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f} '.format(
                       epoch, batch_idx * opt.batch_size, len(db['train']),

@@ -2,6 +2,13 @@
 
 Please provide code in '$../../src/imagenet.py', which automatically downloads $N_k \approx 10$ images for each of 1000 class in imagenet folder $./eval$. At the same time produce text file eval.txt with filenames, its locations "relative to the eval.txt location" and class label (from 0 to 1000)
 
+**Important**: 'eval.txt' and 'train.txt' formats:
+'''
+image1_relative_path label1_class_number_out_of_maximum
+image2_relative_path label2_class_number_out_of_maximum
+image3_relative_path label3_class_number_out_of_maximum
+...
+'''
 ### Two options:
 
 

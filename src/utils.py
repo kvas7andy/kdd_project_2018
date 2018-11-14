@@ -30,7 +30,7 @@ def parse_arg():
     parser.add_argument('-epochs', type=int, default=1)
     parser.add_argument('-report_every', type=int, default=10)
     # whether to apply data augmentation
-    parser.add_argument('-transform', type=bool, default=False)
+    parser.add_argument('-transform', type=bool, default=True)
     # whether to perform evaluation on evaluation set during training
     parser.add_argument('-eval', type=bool, default=True)
     parser.add_argument('-eval_every', type=int, default=500)

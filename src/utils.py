@@ -9,6 +9,7 @@ import logging
 import argparse
 from torch import save
 import time
+import os
 from os import path as path
 
 def parse_arg():
@@ -17,15 +18,16 @@ def parse_arg():
         format="[%(asctime)s]: %(levelname)s: %(message)s"
     )
     parser = argparse.ArgumentParser(description='train.py')
-    parser.add_argument('-pretrained_model_path', type=str, default='./model.t7')
     parser.add_argument('-batch_size', type=int, default=1)
+    parser.add_argument('-dataset_dir', type=str, default='../datasets/dogvscat')
     parser.add_argument('-train_file_path', type=str, default='./train.txt')    
     parser.add_argument('-eval_file_path', type=str, default='./eval.txt')
     parser.add_argument('-num_output', type=int, default=3)
-    parser.add_argument('-model_type', type=str, default='VGG16')
+    parser.add_argument('-model_type', type=str, default='Alex')
+    parser.add_argument('-pretrained_model_path', type=str, default='../model/Alex')
     parser.add_argument('-lr', type=float, default=0.01, help="sgd: 10, adam: 0.001")
     parser.add_argument('-gpuid', type=int, default=0)
-    parser.add_argument('-epochs', type=int, default=10)
+    parser.add_argument('-epochs', type=int, default=1)
     parser.add_argument('-report_every', type=int, default=10)
     # whether to apply data augmentation
     parser.add_argument('-transform', type=bool, default=False)
@@ -38,11 +40,13 @@ def parse_arg():
     return opt
 
 def get_save_dir(opt):
-    save_name = path.join(opt.save_dir, opt.save_name)
-    save_name += 'model_type'
-    save_name += opt.model_type
+    save_name = path.join(opt.save_dir,  opt.model_type)
+    # '__model_type_'
+    if not path.exists(save_name):
+        os.makedirs(save_name)
+    save_name = path.join(save_name, opt.save_name + '_' + time.asctime(time.localtime(time.time())).replace(" ", "_") )
     save_name += '.t7'
-    save_name += time.asctime(time.localtime(time.time()))
+
     return save_name
 
 def save_model(model, opt):

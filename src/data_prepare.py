@@ -11,6 +11,8 @@ import imageio as io
 import numpy as np
 from skimage import img_as_float32
 
+import pandas as pd
+
 class WhatEverDataSet(torch.utils.data.Dataset):
     # dataset object which stores the image paths and landmark annotations
 
@@ -29,7 +31,7 @@ class WhatEverDataSet(torch.utils.data.Dataset):
         # give zero tensors in this version
         if self.transform:
             raise NotImplementedError
-        image = np.ones((3,224,224), dtype=np.float32)
+        image = np.ones((3, 224, 224), dtype=np.float32)
         # the label belongs to the th class
         label = np.array(1, dtype=np.int64)
         sample = {'image': torch.from_numpy(image),

@@ -1,13 +1,22 @@
 # ImageNet dataset
 
-Please provide code in '$../../src/imagenet.py', which automatically downloads $N_k \approx 10$ images for each of 1000 class in imagenet folder $./eval$. At the same time produce text file eval.txt with filenames, its locations "relative to the eval.txt location" and class label (from 0 to 1000)
+Please provide code in '$../../src/imagenet.py', which automatically downloads 
+$N_k \approx 10$ images for each of 1000 class in 'dataset/imagenet/images' folder. 
+At the same time produce text file eval.txt with filenames, its locations 
+"relative to the eval.txt location" and class label (from 0 to 1000)
 
 **Important**: 'eval.txt' and 'train.txt' formats:
+
 '''
-image1_relative_path label1_class_number_out_of_maximum
-image2_relative_path label2_class_number_out_of_maximum
-image3_relative_path label3_class_number_out_of_maximum
+
+image1_path  label1
+
+image2_path  label2
+
+image3_path  label3
+
 ...
+
 '''
 ### Two options:
 
@@ -20,6 +29,10 @@ image3_relative_path label3_class_number_out_of_maximum
 
 Go on with that [tutorial](http://fungai.org/2017/12/12/download-imagenet-images-by-wnid/), hope it will help
 Still need to change the ImageNet_utils to get not all of the images but some of them:
+
+[classes wnid_label_name mapping](https://gist.githubusercontent.com/aaronpolhamus/964a4411c0906315deb9f4a3723aac57/raw/aa66dd9dbf6b56649fa3fab83659b2acbf3cbfd1/map_clsloc.txt)
+
+[wnid_urls](http://image-net.org/imagenet_data/urls/imagenet_fall11_urls.tgz))
 
 From my point of view, the idea is:
 1. Find file with {WNID: image_url} list (I found official xml file [here (~1Gb)](http://image-net.org/imagenet_data/urls/imagenet_fall11_urls.tgz))

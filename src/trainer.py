@@ -13,6 +13,7 @@ def evaluate(model, db, opt):
         opt: command line input from the user
     """
     model.eval()
+    criterion = nn.CrossEntropyLoss()
     with torch.no_grad():
         # set the model in the evaluation mode
         eval_loss = 0
@@ -28,7 +29,7 @@ def evaluate(model, db, opt):
             outputs = model(data)
             _, preds = torch.max(outputs, 1)
 
-            eval_loss += F.cross_entropy(outputs, target).data.item()
+            eval_loss += criterion(outputs, target).data.item()
 
             eval_acc += (preds == target).sum().data.item()
         eval_loss /= num_eval
@@ -46,11 +47,15 @@ def train(model, optim, sche, db, opt):
         opt: command line input from the user
     """
     for epoch in range(1, opt.epochs + 1):
-        sche.step()
+        #sche.step()
         model.train()
         criterion = nn.CrossEntropyLoss()
+        eval_loss = 0
 
-        train_loader = torch.utils.data.DataLoader(db['train'], batch_size = opt.batch_size, shuffle = True)
+        train_loader = torch.utils.data.DataLoader(db['train'], batch_size = opt.batch_size, shuffle = False)
+        if opt.eval:
+            evaluate(model, db, opt)
+            model.train()
         for batch_idx, batch in enumerate(train_loader):
             data = batch['image']
             target = batch['label']
@@ -61,9 +66,9 @@ def train(model, optim, sche, db, opt):
             optim.zero_grad()
             outputs = model(data)
             _, preds = torch.max(outputs, 1)
-            preds = preds.clamp(min=1e-6,max=1) # resolve some numerical issue
 
-            loss = F.cross_entropy(outputs, target)
+            loss = criterion(outputs, target)
+            eval_loss += loss.data.item()
             # compute gradient
             loss.backward()
             #print("Model's state_dict:")
@@ -78,7 +83,8 @@ def train(model, optim, sche, db, opt):
             if batch_idx % opt.report_every == 0:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f} '.format(
                       epoch, batch_idx * opt.batch_size, len(db['train']),
-                      100. * batch_idx / len(train_loader), loss.data.item()))
+                      100. * batch_idx / len(train_loader), eval_loss))
+                eval_loss = 0
             # evaluate model if specified
             if opt.eval and batch_idx!= 0 and batch_idx % opt.eval_every == 0:
                 evaluate(model, db, opt)

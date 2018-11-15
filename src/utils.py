@@ -26,10 +26,10 @@ def parse_arg():
     parser.add_argument('-num_output', type=int, default=2)
     parser.add_argument('-model_type', type=str, default='Alex')
     parser.add_argument('-pretrained_model_path', type=str, default='../model/Alex')
-    parser.add_argument('-lr', type=float, default=0.01, help="sgd: 10, adam: 0.001")
+    parser.add_argument('-lr', type=float, default=0.001, help="sgd: 10, adam: 0.001")
     parser.add_argument('-gpuid', type=int, default=0)
     parser.add_argument('-seed', type=int, default=0)
-    parser.add_argument('-epochs', type=int, default=10)
+    parser.add_argument('-epochs', type=int, default=1)
     parser.add_argument('-report_every', type=int, default=5)
     # whether to apply data augmentation
     parser.add_argument('-transform', type=bool, default=True)

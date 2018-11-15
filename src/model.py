@@ -39,6 +39,12 @@ class Pretrained(nn.Sequential):
             new_classifier.extend([nn.Linear(num_features, self.num_output)])
             # Replace the model classifier
             Alex.classifier = nn.Sequential(*new_classifier)
+            # Freeze first 2 layers, acc to the paper
+            for layer_idx in [0, 3]:
+                for param in Alex.features[layer_idx].parameters():
+                    param.requires_grad = False
+            # Get layer A and layer B
+
             self.add_module('alex', Alex)
             
         if self.model_type == 'VGG16':

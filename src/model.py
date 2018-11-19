@@ -11,7 +11,7 @@ import torch.nn as nn
 
 # this is the pre-trained model that you want to fine-tune
 class Pretrained(nn.Sequential):
-    def __init__(self, model_type = 'VGG16', num_output = 2, pretrained = True, path = None):
+    def __init__(self, model_type = 'VGG16', num_output = 1000, pretrained = True, path = None):
         """
         Args:
             model (string): type of model to be used.
@@ -24,6 +24,7 @@ class Pretrained(nn.Sequential):
         self.num_output = num_output
 
         if self.model_type == 'Alex':
+            Alex = None
             if path is None:
                 # $TORCH_HOME/models
                 Alex = models.alexnet(pretrained=pretrained)
@@ -32,22 +33,29 @@ class Pretrained(nn.Sequential):
                 if pretrained:
                     # load pre-trained model
                     Alex.load_state_dict(torch.load(path))
-            num_features = Alex.classifier[6].in_features
-            # Remove last layer
-            new_classifier = list(Alex.classifier.children())[:-1]
-            # Add a new linear layer with specified number of neurons
-            new_classifier.extend([nn.Linear(num_features, self.num_output)])
-            # Replace the model classifier
-            Alex.classifier = nn.Sequential(*new_classifier)
-            # Freeze first 2 layers, acc to the paper
-            for layer_idx in [0, 3]:
-                for param in Alex.features[layer_idx].parameters():
-                    param.requires_grad = False
-            # Get layer A and layer B
-
-            self.add_module('alex', Alex)
+            if num_output == 1000:
+                self.add_module('alex', Alex)
+            else:
+                num_features = Alex.classifier[6].in_features
+                # Remove last layer
+                new_classifier = list(Alex.classifier.children())[:-1]
+                # Add a new linear layer with specified number of neurons
+                new_classifier.extend([nn.Linear(num_features, self.num_output)])
+                # Replace the model classifier
+                Alex.classifier = nn.Sequential(*new_classifier)
+                # Freeze first 2 layers, acc to the paper
+                for layer_idx in [0, 3]:#range(0, 6)
+                    for param in Alex.features[layer_idx].parameters():
+                        param.requires_grad = False
+                # Get A_layer and B_layer
+                # self.layer_A = Alex.features[-1] # 4th layer from last == last layer of features
+                # self.layer_B = Alex.classifier[-3] # 2 layer from last (FC layers), except ReLu and others
+                self.add_module('alex', Alex)
+                #As well doesn't work self.layer_A = self.alex.features[-1]
+                #print("DELETE it", self.alex.features[-1] is self.layer_A)
             
         if self.model_type == 'VGG16':
+            vgg16 = None
             if path is None:
                 # $TORCH_HOME/models
                 vgg16 = models.vgg16_bn(pretrained=pretrained)
@@ -56,14 +64,21 @@ class Pretrained(nn.Sequential):
                 if pretrained:
                     # load pre-trained model
                     vgg16.load_state_dict(torch.load(path))
-            num_features = vgg16.classifier[6].in_features
-            # Remove last layer
-            new_classifier = list(vgg16.classifier.children())[:-1]
-            # Add a new linear layer with specified number of neurons
-            new_classifier.extend([nn.Linear(num_features, self.num_output)])
-            # Replace the model classifier
-            vgg16.classifier = nn.Sequential(*new_classifier)
-            self.add_module('vgg16', vgg16)
+            if num_output == 1000:
+                self.add_module('vgg16', vgg16)
+            else:
+                num_features = vgg16.classifier[6].in_features
+                # Remove last layer
+                new_classifier = list(vgg16.classifier.children())[:-1]
+                # Add a new linear layer with specified number of neurons
+                new_classifier.extend([nn.Linear(num_features, self.num_output)])
+                # Replace the model classifier
+                vgg16.classifier = nn.Sequential(*new_classifier)
+                # Freeze first 7 layers, acc to the paper
+                for layer_idx in [0, 3, 7, 10, 14, 17]:#range(20)
+                    for param in vgg16.features[layer_idx].parameters():
+                        param.requires_grad = False
+                self.add_module('vgg16', vgg16)
 
     # TODO: optionally resume from a checkpoint
     # if args.resume:
@@ -91,5 +106,7 @@ def prepare_model(opt):
         model = model.cuda()
     else:
         model = model.cpu()
+
+        #model = models.resnet18()
 
     return model

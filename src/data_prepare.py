@@ -51,8 +51,8 @@ class WhatEverDataSet(torch.utils.data.Dataset):
 
         data_transforms = {
             'train': transforms.Compose([
-                #transforms.Resize(256),
-                transforms.RandomResizedCrop(224),
+                transforms.Resize(256),
+                transforms.RandomCrop(224),
                 #transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [1, 1, 1])#,[0.229, 0.224, 0.225])
@@ -101,6 +101,9 @@ class WhatEverDataSet(torch.utils.data.Dataset):
         return self.n_dataset
 
     def __getitem__(self, idx):
+
+        if type(idx) != int:
+            idx = idx.data.item()
         # give image from text file
         img_name = os.path.join(self.dataset_dir,
                                 self.info_db.iloc[idx, 0])
@@ -120,15 +123,78 @@ class WhatEverDataSet(torch.utils.data.Dataset):
 
         return sample
 
+class ImageNetSmallData(torch.utils.data.Dataset):
+    # dataset object which stores the image paths and landmark annotations
+
+    def __init__(self, opt, type='all'):
+        """
+            txt_file (string): You can specify the pathes to the images in a txt file
+        """
+        self.dataset_dir = '../datasets/imagenet'
+        info_txt_path = path.join(self.dataset_dir,
+                                  'train.txt' if type == 'all' else 'train_centres.txt')
+
+        if not path.exists(info_txt_path):
+            raise NotImplementedError
+
+        self.info_db = pd.read_csv(info_txt_path,
+                                   sep=' ', header=None,
+                                   names=['path', 'label'], dtype={'path':str, 'label': np.int64})
+        self.n_dataset = 1000 if type != 'all' else 10000
+
+        self.transform = opt.transform # True/False
+        data_transforms = {
+            'train': transforms.Compose([
+                transforms.Resize(256),
+                transforms.RandomCrop(224),
+                #transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize([0.485, 0.456, 0.406], [1, 1, 1])#,[0.229, 0.224, 0.225])
+            ])
+        }
+
+        if self.transform:
+            # Use ImageNet transformation for each dataset
+            self.transform = data_transforms['train']
+
+        self.num_classes = 1000
+        #self.dummy_data = (np.random.randn(self.n_dataset, 224, 224, 3)*255).astype(np.uint8)
+
+    def __len__(self):
+        return self.n_dataset
+
+    def __getitem__(self, idx):
+        # give image from text file
+        # img_name = os.path.join(self.dataset_dir,
+        #                         self.info_db.iloc[idx, 0])
+
+        #image = Image.open(img_name).convert('RGB') # HxWx3
+        # dummy values
+
+        #image = Image.fromarray(self.dummy_data[idx]).convert('RGB')
+        image = Image.fromarray((np.random.randn(224, 224, 3)*255).astype(np.uint8)).convert('RGB')
+
+        if self.transform:
+            image = self.transform(image)
+        # the label belongs to the th class
+        #label = np.array(self.info_db.iloc[idx, 1])
+        # dummy values
+        label = np.array(self.info_db.iloc[idx, 1])
+
+        #label = np.zeros((self.num_classes,), dtype=np.int64)
+        #print(label.shape)
+        #label[self.info_db.iloc[idx, 1]] = 1
+
+        sample = {'image': image,
+                  'label': torch.from_numpy(label)}
+
+        return sample
+
 def prepare_db(opt):
-
-    # Use ImageNet tranimagesform
-
+    # Get fine-tuned dataset
     training_set = WhatEverDataSet(opt)
     if opt.eval_file_path == '':
         return {'train': training_set}
     else:
         evaluation_set = WhatEverDataSet(opt, type='eval')
         return {'train': training_set, 'eval': evaluation_set}
-
-     

@@ -7,4 +7,4 @@ def add_path(path):
 
 this_dir = osp.dirname(__file__)
 
-add_path('./libs')
+add_path(osp.join(this_dir,'libs'))

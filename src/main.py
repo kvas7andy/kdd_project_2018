@@ -33,7 +33,7 @@ def main():
     else:
         pretrained_model_0 = pretrained_model_0.cpu()
     # prepare centres
-    if not os.path.exists('../datasets/imagenet/train_centres.txt'):
+    if not os.path.exists('../datasets/imagenet/train_centers'+'_'+str(opt.model_type)+'.txt'):
         imagenet = data_prepare.ImageNetSmallData(opt, type='all')
         trainer.prepare_centres(pretrained_model_0, imagenet, opt)
 

@@ -227,24 +227,11 @@ def prepare_centres(model, imagenet, opt):
     outputs_min = []
     for label in np.unique(outputs_label):
         label_eq = outputs_label == label
-        min_idx = np.argmin(np.sum(((outputs_layer
-                 - outputs_average[label][np.newaxis, :])* label_eq[:, np.newaxis])**2, axis=-1))
-        outputs_min += [min_idx]
-    print(outputs_min)
+        min_idx = np.argmin(np.sum(((outputs_layer[label_eq]
+                 - outputs_average[label][np.newaxis, :])**2), axis=-1))
+        outputs_min += [np.where(label_eq)[0][min_idx]]
 
     with open('../datasets/imagenet/train.txt') as f:
         content = np.array(f.readlines())
-    with open('../datasets/imagenet/train_centres.txt', "w") as f:
+    with open('../datasets/imagenet/train_centers'+'_'+str(opt.model_type)+'.txt', "w") as f:
         f.write("".join(content[outputs_min].tolist()))
-
-
-
-
-
-
-
-
-
-
-
-    '../datasets/imagenet/train_centres.txt'

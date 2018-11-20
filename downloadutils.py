@@ -2,6 +2,9 @@
 import argparse
 import sys
 import os
+from os import path as pth
+import pandas as pd
+import math
 import _init_paths
 from libs import imagedownloader
 from libs import pref_utils
@@ -17,8 +20,9 @@ if __name__ == '__main__':
     # p.add_argument('--timeout', '-t', type=int, default=10, help='Timeout per image in seconds')
     # p.add_argument('--retry', '-r', type=int, default=10, help='Max count of retry for each image')
     p.add_argument('--verbose', '-v', action='store_true', help='Enable verbose log')
+    p.add_argument('--n_image_per_class', '-pipc', type=int, default=3, help='Number of images per class to download')
     p.add_argument('--wnid_url_map_dir', '-wumd', type=str,
-                   default='/home/akvasov/Documents/COMP5331/kdd_project/cost-effective-transfer-learning-master/datasets/imagenet',
+                   default='datasets/imagenet',
                    help='dataset, where to store')
 
     args = p.parse_args()
@@ -40,27 +44,45 @@ if __name__ == '__main__':
 
         with open(os.path.join(args.wnid_url_map_dir, 'map_clsloc.txt')) as fp:
             #../datasets/imagenet/train/
-            #0_1.jpg
+            #0_1.jpgf
             #../datasets/imagenet/train.txt
             #path to the image label
 
-            for line in fp:
-                linesegs = line.strip().split(' ')
-                label = str(int(linesegs[1])-1)
-                label_name = linesegs[2]
-                list = downloader.getImageURLsOfWnid(linesegs[0])
-                cnt = 0
-                for l in list:
-                    filename_info = {'dataset_dir':args.wnid_url_map_dir,
-                                     'filename':  label + '_' + str(cnt) + '.jpg'}
-                    status = downloader.downloadImagesByURLs(linesegs[0], [l],
-                                                    filename_info = filename_info)
-                    if status is not None:
-                        file_list += [filename_info['filename'] + ' ' + label_name]
-                        cnt += 1
+            preimaged_db = pd.read_csv(os.path.join(args.wnid_url_map_dir, "train", "train_whole.txt"),
+                       sep=' ', header=None,
+                       names=['img_name', 'class', 'img_id', 'url'], dtype={'img_name':str, 'class': str,
+                                                                            'img_id':str, 'url': str})
+            with open(pth.join(args.wnid_url_map_dir, 'train', "train_whole.txt"), "a") as fw:
+                for line in fp:
+                    linesegs = line.strip().split(' ')
+                    label = str(int(linesegs[1])-1)
+                    label_name = linesegs[2]
+                    cnt = 0
+                    if label == '832':
+                        l = downloader.getImageURLsOfWnid(linesegs[0])
+                        print l
+                    if preimaged_db[preimaged_db["class"] ==label].shape[0] >= args.n_image_per_class:
+                        continue
+                    else:
+                        cnt_t = preimaged_db[preimaged_db["class"] ==label]["img_id"].max()
+                        cnt = 0 if math.isnan(float(cnt_t)) else int(cnt_t)
 
-                    if cnt >= 10:
-                        break
+
+                    list = downloader.getImageURLsOfWnid(linesegs[0])
+                    for l in list:
+                        filename_info = {'dataset_dir':args.wnid_url_map_dir,
+                                         'filename':  label + '_' + str(cnt) + '.jpg'}
+                        status = downloader.downloadImagesByURLs(linesegs[0], [l],
+                                                        filename_info = filename_info)
+                        if status is not None:
+                            file_list += [filename_info['filename'] + ' ' + label_name]
+                            fw.write(pth.join('train', filename_info['filename'])
+                                     + ' ' + label + ' ' + str(cnt) + ' ' +  str(l) + '\n')
+                            fw.flush()
+                            cnt += 1
+
+                        if cnt >= args.n_image_per_class: #3
+                            break
         with open(os.path.join(args.wnid_url_map_dir, "train.txt"), "w") as f:
             f.write("\n".join(file_list))
 
@@ -68,7 +90,7 @@ if __name__ == '__main__':
     if args.downloadImages is True:
         for id in args.wnid:
             list = downloader.getImageURLsOfWnid(id)
-            list = list[0:19]
+            list = list[0:]
             downloader.downloadImagesByURLs(id, list)
 
     if args.downloadBoundingBox is True:

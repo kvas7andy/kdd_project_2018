@@ -1,5 +1,10 @@
 # ImageNet dataset
 
+*Notice:* 
+
+1. 785 class: teddy bear. No available synset on imagenet web-site. Thus, I downloaded them with Google Search, see urls in './train/train_whole.txt'
+2. Code provided ("$PROJ_ROOT/downloadutils.py") can download any number of images per class using 'n_image_per_class' parameter
+
 Please provide code in '$../../src/imagenet.py', which automatically downloads 
 $N_k \approx 10$ images for each of 1000 class in 'dataset/imagenet/images' folder. 
 At the same time produce text file eval.txt with filenames, its locations 

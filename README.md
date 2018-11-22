@@ -6,9 +6,8 @@ This project replicates the paper "Cost-Effective Training of Deep CNNs with Act
 
 #### Structure
 
-├── datasets              contains files for ImageNet, DogVsCat datasets
-
-│   ├── c_x_A_B           stores calculated features from layers VGG, AlexNet models (from pretrained models) 
+├── datasets              Contains files for ImageNet, DogVsCat datasets (source files as well as images and .txt contents)
+│   ├── c_x_A_B           Stores calculated features from layers VGG, AlexNet models (from pretrained models) 
 
 │   │   ├── alex
 
@@ -24,9 +23,9 @@ This project replicates the paper "Cost-Effective Training of Deep CNNs with Act
 
 │       └── train
 
-├── libs                  src files for ImageNet dataset download
+├── libs                  Src files for ImageNet dataset download
 
-├── src                   all source files for the project, except ImageNet downloaders
+├── src                   All source files for the project, except ImageNet downloaders
 
 #### Prerequirements:
 * python3.6

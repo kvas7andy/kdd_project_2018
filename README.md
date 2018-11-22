@@ -1,4 +1,5 @@
-# KDD Project
+# KDD Project 2018
+This is the README.md file of github repository [github.com/kvas7andy/kdd_project_2018](https://github.com/kvas7andy/kdd_project_2018)
 
 ## General info
 

@@ -11,11 +11,9 @@ This project replicates the paper "Cost-Effective Training of Deep CNNs with Act
 | ------------- |:-------------:| 
 | ├── datasets       | Contains files for ImageNet, DogVsCat datasets (source files as well as images and .txt contents) | 
 | /├── c_x_A_B      | Stores calculated features from layers VGG, AlexNet models (from pretrained models)       |   
-|  //├── alex  |      |
-|  //└── vgg16  |      |
-|  /├── dogvscat   |      |
-|  //├── test1  |      |
-|  //└── train  |      |
+|  //├── alex  |      |  For AlexNet: Will store trasfromations c_A, c_B and Sc_A2B (refering the [paper](https://www.kdd.org/kdd2018/accepted-papers/view/cost-effective-training-of-deep-cnns-with-active-model-adaptation) notation)
+|  //└── vgg16  |   For VGG16: the same   |
+|  /├── dogvscat   |   DogVSCat folder  to store folder `train` and `train.txt`, `eval.txt` files references images from that folder |
 |  /└── imagenet  | Files related to structured ImageNet dataset from the      |
 |  ├── libs    | Src files for ImageNet dataset download     | 
 |  ├── src   |  All source files for the project, except ImageNet downloaders   | 
@@ -55,7 +53,7 @@ No compilation necessary  but preliminary datasets download is necessary, go to 
   * `eval_every` - evaluation frequency (number of acative batches)
   * `report_every` - report evaluation performance by printing
   
-2. Then execute [src/main.py](src/main.py) with `python3.6 main.py`
+2. Then execute [src/main.py](src/main.py): `python3.6 ./src/main.py`
 3. Output will be the accuracy change while fine-tuning on evalutaion dataset stored in `.npy` format in files `historyactive_[active][lambda value]`
 
 *For any questions refer to the authors:*

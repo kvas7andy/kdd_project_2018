@@ -28,7 +28,7 @@ This project replicates the paper "Cost-Effective Training of Deep CNNs with Act
 * pillow
 * urllib
 
-Tested on Ubuntu 16.04
+Tested on Ubuntu 16.04 with 12 Gb GPU
 
 ## Compilation
 No compilation necessary  but preliminary datasets download is necessary, go to folders of [ImageNet](datasets/imagenet) and [DogVSCat](datasets/dogvscat) dataset

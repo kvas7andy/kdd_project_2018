@@ -5,6 +5,7 @@ import time
 
 import pandas as pd
 
+max_id = 10
 
 db_dir = 'datasets/imagenet'
 if False:
@@ -34,6 +35,7 @@ if True:
                                       'img_id': int, 'url':str})
     #preimaged_db["img_name"] = preimaged_db["img_name"].apply(lambda x: '/'.join(x.split('/')[-2:]))
     preimaged_db = preimaged_db.sort_values(['class', 'img_id'], ascending=[True, True])
-    #preimaged_db.to_csv(pth.join(db_dir, 'train', "train_whole.txt"), sep=' ', index=False, header=False)
-    db = preimaged_db[preimaged_db["img_id"] < 3][['img_name', 'class']]
+    preimaged_db.drop_duplicates(subset=['class', 'img_id'], keep='first', inplace=True)
+    preimaged_db.to_csv(pth.join(db_dir, 'train', "train_whole.txt"), sep=' ', index=False, header=False)
+    db = preimaged_db[preimaged_db["img_id"] < max_id][['img_name', 'class']]
     db.to_csv(pth.join(db_dir, "train.txt"), sep=' ', index=False, header=False)

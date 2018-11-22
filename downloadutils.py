@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # p.add_argument('--timeout', '-t', type=int, default=10, help='Timeout per image in seconds')
     # p.add_argument('--retry', '-r', type=int, default=10, help='Max count of retry for each image')
     p.add_argument('--verbose', '-v', action='store_true', help='Enable verbose log')
-    p.add_argument('--n_image_per_class', '-pipc', type=int, default=3, help='Number of images per class to download')
+    p.add_argument('--n_image_per_class', '-nipc', type=int, default=10, help='Number of images per class to download')
     p.add_argument('--wnid_url_map_dir', '-wumd', type=str,
                    default='datasets/imagenet',
                    help='dataset, where to store')
@@ -58,9 +58,9 @@ if __name__ == '__main__':
                     label = str(int(linesegs[1])-1)
                     label_name = linesegs[2]
                     cnt = 0
-                    if label == '832':
-                        l = downloader.getImageURLsOfWnid(linesegs[0])
-                        print l
+                    # if label == '832':
+                    #     l = downloader.getImageURLsOfWnid(linesegs[0])
+                    #     print l
                     if preimaged_db[preimaged_db["class"] ==label].shape[0] >= args.n_image_per_class:
                         continue
                     else:

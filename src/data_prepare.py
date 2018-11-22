@@ -15,8 +15,6 @@ import torch.utils.data
 import imageio as io
 import numpy as np
 from PIL import Image
-from PIL import ImageFile
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 from skimage import img_as_float32
 
 import torch
@@ -57,13 +55,13 @@ class WhatEverDataSet(torch.utils.data.Dataset):
                 transforms.RandomCrop(224),
                 #transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [1, 1, 1])#,[0.229, 0.224, 0.225])
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])#,[0.229, 0.224, 0.225])
             ]),
             'eval': transforms.Compose([
                 transforms.Resize(256),
                 transforms.CenterCrop(224),
                 transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [1, 1, 1])#, [0.229, 0.224, 0.225])
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])#, [0.229, 0.224, 0.225])
             ]),
         }
 
@@ -134,7 +132,7 @@ class ImageNetSmallData(torch.utils.data.Dataset):
         """
         self.dataset_dir = '../datasets/imagenet'
         info_txt_path = path.join(self.dataset_dir,
-                                  'train.txt' if type == 'all' else 'train_centers'+'_'+str(opt.model_type)+'.txt')
+                                  'train.txt' if type == 'all' else 'train_centres.txt')
 
         if not path.exists(info_txt_path):
             raise NotImplementedError
@@ -142,8 +140,7 @@ class ImageNetSmallData(torch.utils.data.Dataset):
         self.info_db = pd.read_csv(info_txt_path,
                                    sep=' ', header=None,
                                    names=['path', 'label'], dtype={'path':str, 'label': np.int64})
-        #self.n_dataset = 1000 if type != 'all' else 10000
-        self.n_dataset = self.info_db.shape[0]
+        self.n_dataset = 1000 if type != 'all' else 10000
 
         self.transform = opt.transform # True/False
         data_transforms = {
@@ -152,7 +149,7 @@ class ImageNetSmallData(torch.utils.data.Dataset):
                 transforms.RandomCrop(224),
                 #transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [1, 1, 1])#,[0.229, 0.224, 0.225])
+                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])#,[0.229, 0.224, 0.225])
             ])
         }
 
@@ -167,31 +164,31 @@ class ImageNetSmallData(torch.utils.data.Dataset):
         return self.n_dataset
 
     def __getitem__(self, idx):
-        if type(idx) != int:
-            idx = idx.data.item()
         # give image from text file
-        img_name = os.path.join(self.dataset_dir,
-                                self.info_db.iloc[idx, 0])
+        # img_name = os.path.join(self.dataset_dir,
+        #                         self.info_db.iloc[idx, 0])
 
-        image = Image.open(img_name).convert('RGB') # HxWx3
+        #image = Image.open(img_name).convert('RGB') # HxWx3
         # dummy values
 
         #image = Image.fromarray(self.dummy_data[idx]).convert('RGB')
-        #image = Image.fromarray((np.random.randn(224, 224, 3)*255).astype(np.uint8)).convert('RGB')
+        image = Image.fromarray((np.random.randn(224, 224, 3)*255).astype(np.uint8)).convert('RGB')
 
         if self.transform:
             image = self.transform(image)
         # the label belongs to the th class
-        label = np.array(self.info_db.iloc[idx, 1])
+        #label = np.array(self.info_db.iloc[idx, 1])
         # dummy values
+        # debug no label for now
         #label = np.array(self.info_db.iloc[idx, 1])
 
         #label = np.zeros((self.num_classes,), dtype=np.int64)
         #print(label.shape)
         #label[self.info_db.iloc[idx, 1]] = 1
-
-        sample = {'image': image,
-                  'label': torch.from_numpy(label)}
+        
+        sample = {'image':image}
+#        sample = {'image': image,
+#                  'label': torch.from_numpy(label)}
 
         return sample
 

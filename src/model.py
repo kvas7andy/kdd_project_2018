@@ -65,6 +65,7 @@ class Pretrained(nn.Sequential):
                     # load pre-trained model
                     vgg16.load_state_dict(torch.load(path))
             if num_output == 1000:
+                # do not replace the last layer
                 self.add_module('vgg16', vgg16)
             else:
                 num_features = vgg16.classifier[6].in_features
@@ -75,7 +76,7 @@ class Pretrained(nn.Sequential):
                 # Replace the model classifier
                 vgg16.classifier = nn.Sequential(*new_classifier)
                 # Freeze first 7 layers, acc to the paper
-                for layer_idx in [0, 3, 7, 10, 14, 17]:#range(20)
+                for layer_idx in [0, 3, 7, 10, 14, 17, 20]:#range(20)
                     for param in vgg16.features[layer_idx].parameters():
                         param.requires_grad = False
                 self.add_module('vgg16', vgg16)

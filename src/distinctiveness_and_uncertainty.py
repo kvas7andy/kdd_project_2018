@@ -98,7 +98,7 @@ if check:
     p = np.ones((batch_size, K_new))/batch_size
 
 def uncertainty(p):
-    return(-1 * np.sum(p * (1 - p), axis=-1))
+    return(np.sum(p * (1 - p), axis=-1))
 
 if check:
     start_time = time.time()
@@ -107,7 +107,10 @@ if check:
 
 # ----------------------- calculate  score -------------------------------
 def score(lamb, t, p, alpha, x_A, x_B, c_A, c_B, Sc_A2B=None):
-    return lamb**t * distinct(alpha, x_A, x_B, c_A, c_B, Sc_A2B=Sc_A2B) + (1-lamb**t) * uncertainty(p)
+    if (1-lamb*t) <= 0:
+        return uncertainty(p)
+    else:
+        return (1-lamb*t)* distinct(alpha, x_A, x_B, c_A, c_B, Sc_A2B=Sc_A2B) + lamb*t * uncertainty(p)
 
 if check:
     lamb = 0.9

@@ -25,36 +25,35 @@ def main():
         torch.cuda.set_device(opt.gpuid)
     else:
         utils.time_str("GPU acceleration is disabled.")
-
-    # prepare M_0(x) model for training
-    pretrained_model_0 = model.Pretrained(model_type=opt.model_type, num_output=1000, pretrained=True)
-    if opt.cuda:
-        pretrained_model_0 = pretrained_model_0.cuda()
-    else:
-        pretrained_model_0 = pretrained_model_0.cpu()
-    # prepare centres
-    if not os.path.exists('../datasets/imagenet/train_centers'+'_'+str(opt.model_type)+'.txt'):
-        imagenet = data_prepare.ImageNetSmallData(opt, type='all')
-        trainer.prepare_centres(pretrained_model_0, imagenet, opt)
-
+        
     # prepare data
     db = data_prepare.prepare_db(opt)
     imagenet = data_prepare.ImageNetSmallData(opt, type='centres')
-
-    # add imagenet dataset
+#    imagenet = None
+#
+#    # add imagenet dataset
     db.update({'imagenet': imagenet})
 
     # initialize the model
     pre_trained_model = model.prepare_model(opt)
 
+    # prepare M_0(x) model, which is a fixed pre-trained model
+    opt.num_output = 1000
+    fixed_model = model.prepare_model(opt)
+    # prepare centres
+    if not os.path.exists('../datasets/imagenet/train_centres.txt'):
+        imagenet = data_prepare.ImageNetSmallData(opt, type='all')
+        trainer.prepare_centres(fixed_model, imagenet, opt)
+        
     # configurate the optimizer
     optim, sche = optimizer.prepare_optim(pre_trained_model, opt)
 
     # train the model
-    trainer.train(pre_trained_model, optim, sche, db, opt, model_0 = pretrained_model_0)
-
+    trainer.train(pre_trained_model, optim, sche, db, opt, model_0 = fixed_model)
+#    trainer.train(pre_trained_model, optim, sche, db, opt, model_0 = None)
     # save the trained model
-    utils.save_model(pre_trained_model, opt)
+    if opt.save:
+        utils.save_model(pre_trained_model, opt)
 
 if __name__ == '__main__':
     main()

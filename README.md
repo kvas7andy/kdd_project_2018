@@ -55,3 +55,10 @@ No compilation necessary  but preliminary datasets download is necessary, go to 
   * `report_every` - report evaluation performance by printing
   
 2. Then execute [src/main.py](src/main.py) with `python3.6 main.py`
+3. Output will be the accuracy change while fine-tuning on evalutaion dataset stored in `.npy` format in files `historyactive_[active][lambda value]`
+
+*For any questions refer to the authors:*
+
+* KVASOV Andrei: akvasov@connect.ust.hk
+* LI Shichao: nicholas.li@connect.ust.hk
+* LI Ziyue: zlibn@connect.ust.hk 
